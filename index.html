@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Turismo Recuay | La Puerta del Callejón de Huaylas</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Poppins', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 flex flex-col min-h-screen">
+
+    <!-- Header / Navbar -->
+    <header class="bg-emerald-800 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2 cursor-pointer" onclick="filterCategory('all')">
+                <i class="fa-solid fa-mountain-sun text-2xl text-amber-400"></i>
+                <span class="text-xl font-bold tracking-wide">Recuay Turístico</span>
+            </div>
+            <nav class="hidden md:flex space-x-6 text-sm font-medium">
+                <button onclick="filterCategory('all')" class="hover:text-amber-300 transition">Explorar Todo</button>
+                <button onclick="filterCategory('lugar')" class="hover:text-amber-300 transition">Lugares</button>
+                <button onclick="filterCategory('restaurante')" class="hover:text-amber-300 transition">Restaurantes</button>
+                <button onclick="filterCategory('hospedaje')" class="hover:text-amber-300 transition">Hospedajes</button>
+            </nav>
+            <div>
+                <button onclick="openMapModal()" class="bg-amber-500 hover:bg-amber-600 text-slate-900 font-semibold px-4 py-2 rounded-full text-sm shadow transition flex items-center gap-2">
+                    <i class="fa-solid fa-map-location-dot"></i> Ver Mapa General
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative bg-slate-900 text-white py-20 px-4 text-center bg-cover bg-center" style="background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1589531904975-d00346129532?auto=format&fit=crop&w=1600&q=80');">
+        <div class="max-w-3xl mx-auto space-y-4">
+            <span class="bg-emerald-700 text-xs font-semibold uppercase tracking-widest px-3 py-1 rounded-full">Áncash - Perú</span>
+            <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight">Descubre la Magia de Recuay</h1>
+            <p class="text-slate-200 text-sm md:text-base">Guía oficial con los mejores atractivos naturales, historia milenaria, gastronomía típica y alojamientos de la provincia.</p>
+            
+            <!-- Barra de Búsqueda -->
+            <div class="mt-6 flex justify-center">
+                <div class="bg-white rounded-full p-2 shadow-lg flex items-center w-full max-w-md">
+                    <i class="fa-solid fa-search text-slate-400 ml-3"></i>
+                    <input type="text" id="searchInput" onkeyup="searchCards()" placeholder="Busca atracciones, platos, hoteles..." class="w-full px-3 py-1 text-slate-700 focus:outline-none text-sm">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content Grid -->
+    <main class="max-w-7xl mx-auto px-4 py-10 flex-grow w-full">
+        <div class="flex justify-between items-center mb-6">
+            <h2 id="sectionTitle" class="text-2xl font-bold text-slate-800">Destinos y Servicios Destacados</h2>
+            <div class="text-xs text-slate-500" id="resultCount">Mostrando resultados</div>
+        </div>
+
+        <!-- Tarjetas Dinámicas -->
+        <div id="cardsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Inyectado por JavaScript -->
+        </div>
+    </main>
+
+    <!-- Modal de Detalle / Mapa -->
+    <div id="detailModal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full overflow-hidden shadow-2xl animate-fade-in">
+            <div id="modalContent">
+                <!-- Contenido dinámico del modal -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-slate-800 text-slate-300 py-8 text-center text-sm">
+        <div class="max-w-7xl mx-auto px-4 space-y-2">
+            <p class="font-semibold text-white">Plataforma Turística de Recuay &copy; 2026</p>
+            <p>Promoviendo el turismo sostenible, la cultura milenaria y la belleza paisajística del sur del Callejón de Huaylas.</p>
+        </div>
+    </footer>
+
+    <!-- Script de Base de Datos y Lógica -->
+    <script>
+        const database = [
+            {
+                id: 1,
+                category: 'lugar',
+                title: 'Gruta de San Patricio',
+                type: 'Atractivo Natural y Religioso',
+                image: 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80',
+                description: 'Gruta natural de granito con formaciones geológicas y escenario de ricos mitos y leyendas locales de Recuay.',
+                location: 'A pocos minutos de la ciudad de Recuay',
+                details: 'Ideal para paseos cortos, fotografía de naturaleza y exploración de leyendas andinas.'
+            },
+            {
+                id: 2,
+                category: 'lugar',
+                title: 'Bosque de Piedras de Hatun Machay',
+                type: 'Turismo de Aventura',
+                image: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80',
+                description: 'Impresionante bosque de piedras con formas caprichosas y cuevas con arte rupestre milenario.',
+                location: 'Desvío en ruta hacia Conococha (Sur de Recuay)',
+                details: 'Excelente zona para escalada en roca, trekking de altura y avistamiento paisajístico.'
+            },
+            {
+                id: 3,
+                category: 'lugar',
+                title: 'Laguna de Conococha',
+                type: 'Paisaje Altiplánico',
+                image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+                description: 'Ubicada a más de 4,050 m s. n. m., es el lugar emblemático donde nace el caudaloso río Santa.',
+                location: 'Sur de la provincia de Recuay',
+                details: 'Paisaje altoandino puro, ideal para paradas fotográficas y pesca deportiva de truchas.'
+            },
+            {
+                id: 4,
+                category: 'restaurante',
+                title: 'Hacienda Norabuena (Restaurante)',
+                type: 'Gastronomía Típica',
+                image: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80',
+                description: 'Disfruta de platos tradicionales como la Pachamanca, Shacwi, y cuy chactado en un ambiente campestre único.',
+                location: 'Centro Poblado de Huancapampa, Recuay',
+                details: 'Horario: Martes a Domingo (Desayunos, almuerzos andinos y cenas).'
+            },
+            {
+                id: 5,
+                category: 'restaurante',
+                title: 'Restaurante Turístico La Gruta',
+                type: 'Comida Regional',
+                image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=800&q=80',
+                description: 'Especialistas en la preparación de trucha frita, caldo de cabeza y sopa de papas (Papa Cashki).',
+                location: 'Plaza Principal de Recuay',
+                details: 'Ambiente familiar y cálido refugio contra el frío de la sierra.'
+            },
+            {
+                id: 6,
+                category: 'hospedaje',
+                title: 'Hospedaje Hacienda Norabuena',
+                type: 'Hotel Campestre Boutique',
+                image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
+                description: 'Habitaciones con baño privado, agua caliente solar, wifi y amplias áreas verdes conectadas al río Santa.',
+                location: 'Barrio Aconan, Huancapampa - Recuay',
+                details: 'Incluye estacionamiento privado, granja artesanal y zonas ideales para trekking.'
+            },
+            {
+                id: 7,
+                category: 'hospedaje',
+                title: 'San Sebastián Hotel Boutique',
+                type: 'Alojamiento Urbano',
+                image: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=800&q=80',
+                description: 'Cómoda infraestructura céntrica con excelente vista panorámica hacia los picos y la Cordillera Negra.',
+                location: 'Cercanías a la Plaza de Armas de Recuay',
+                details: 'Atención personalizada, asistencia para tours al Nevado Pastoruri y guías locales.'
+            }
+        ];
+
+        let currentFilter = 'all';
+
+        function renderCards(items) {
+            const container = document.getElementById('cardsContainer');
+            document.getElementById('resultCount').innerText = `Mostrando ${items.length} resultados`;
+            
+            if (items.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400">No se encontraron resultados para tu búsqueda.</div>`;
+                return;
+            }
+
+            container.innerHTML = items.map(item => `
+                <div class="bg-white rounded-xl shadow-sm hover:shadow-md transition overflow-hidden border border-slate-100 flex flex-col">
+                    <div class="relative h-48 overflow-hidden">
+                        <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover hover:scale-105 transition duration-500">
+                        <span class="absolute top-3 left-3 bg-slate-900/80 text-white text-xs font-semibold px-2.5 py-1 rounded-md uppercase tracking-wider backdrop-blur-sm">
+                            ${item.category.toUpperCase()}
+                        </span>
+                    </div>
+                    <div class="p-5 flex flex-col flex-grow">
+                        <span class="text-xs font-bold text-emerald-700 uppercase mb-1">${item.type}</span>
+                        <h3 class="text-lg font-bold text-slate-800 mb-2">${item.title}</h3>
+                        <p class="text-slate-600 text-sm mb-4 flex-grow">${item.description}</p>
+                        <div class="border-t border-slate-100 pt-3 flex items-center justify-between mt-auto">
+                            <span class="text-xs text-slate-500 flex items-center gap-1">
+                                <i class="fa-solid fa-location-dot text-amber-600"></i> ${item.location}
+                            </span>
+                            <button onclick="openDetail(${item.id})" class="text-emerald-700 hover:text-emerald-800 font-semibold text-sm flex items-center gap-1">
+                                Ver más <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterCategory(cat) {
+            currentFilter = cat;
+            document.getElementById('searchInput').value = '';
+            if (cat === 'all') {
+                document.getElementById('sectionTitle').innerText = 'Destinos y Servicios Destacados';
+                renderCards(database);
+            } else {
+                const titles = { lugar: 'Lugares Turísticos y Naturaleza', restaurante: 'Gastronomía y Restaurantes', hospedaje: 'Hospedajes y Hoteles' };
+                document.getElementById('sectionTitle').innerText = titles[cat];
+                renderCards(database.filter(i => i.category === cat));
+            }
+        }
+
+        function searchCards() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            let filtered = database.filter(item => 
+                item.title.toLowerCase().includes(query) || 
+                item.description.toLowerCase().includes(query) || 
+                item.location.toLowerCase().includes(query)
+            );
+            if (currentFilter !== 'all') {
+                filtered = filtered.filter(i => i.category === currentFilter);
+            }
+            renderCards(filtered);
+        }
+
+        function openDetail(id) {
+            const item = database.find(i => i.id === id);
+            const modal = document.getElementById('detailModal');
+            const content = document.getElementById('modalContent');
+
+            content.innerHTML = `
+                <div class="relative h-56">
+                    <img src="${item.image}" class="w-full h-full object-cover">
+                    <button onclick="closeModal()" class="absolute top-3 right-3 bg-black/60 text-white w-8 h-8 rounded-full flex items-center justify-center hover:bg-black">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-md uppercase">${item.type}</span>
+                    <h3 class="text-2xl font-bold text-slate-800">${item.title}</h3>
+                    <p class="text-slate-600 text-sm">${item.description}</p>
+                    <div class="bg-slate-50 p-3 rounded-lg text-xs space-y-2 border border-slate-100">
+                        <p><strong>Ubicación:</strong> ${item.location}</p>
+                        <p><strong>Detalles clave:</strong> ${item.details}</p>
+                    </div>
+                    <div class="flex justify-end gap-3 pt-2">
+                        <button onclick="closeModal()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-semibold rounded-lg transition">Cerrar</button>
+                        <a href="https://maps.google.com/?q=${encodeURIComponent(item.title + ' Recuay Ancash')}" target="_blank" class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold rounded-lg transition flex items-center gap-2">
+                            <i class="fa-solid fa-map"></i> Abrir en Maps
+                        </a>
+                    </div>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('detailModal');
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        }
+
+        function openMapModal() {
+            const modal = document.getElementById('detailModal');
+            const content = document.getElementById('modalContent');
+
+            content.innerHTML = `
+                <div class="p-6 space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xl font-bold text-slate-800">Mapa Geográfico de Recuay</h3>
+                        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                    </div>
+                    <p class="text-sm text-slate-600">Recuay está ubicado a 3,422 m s. n. m., a solo 27 km al sur de Huaraz, sirviendo como la entrada estratégica hacia el nevado Pastoruri.</p>
+                    <div class="bg-slate-100 h-64 rounded-xl flex flex-col items-center justify-center p-4 text-center border border-dashed border-slate-300">
+                        <i class="fa-solid fa-map-marked-alt text-4xl text-emerald-700 mb-2"></i>
+                        <span class="text-sm font-medium text-slate-700">Vista esquemática del Callejón de Huaylas Sur</span>
+                        <span class="text-xs text-slate-500 mt-1">Conecta con Cátac, Ticapampa y el circuito altoandino.</span>
+                    </div>
+                    <div class="flex justify-end">
+                        <a href="https://maps.google.com/?q=Recuay+Ancash+Peru" target="_blank" class="w-full py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold rounded-lg text-center transition">
+                            Ver Mapa Completo en Google Maps
+                        </a>
+                    </div>
+                </div>
+            `;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        // Inicializar carga
+        renderCards(database);
+    </script>
+</body>
+</html>
